@@ -44,6 +44,19 @@ public class Vector {
         this.z = z;
     }
 
+
+    public void addX(float i) {
+        this.x += i;
+    }
+
+    public void addY(float i) {
+        this.y += i;
+    }
+
+    public void addZ(float i) {
+        this.z += i;
+    }
+
     public Vector vectorAdd(Vector vector) {
         return new Vector(this.x + vector.getX(), this.y + vector.getY(), this.z + vector.getZ());
     }

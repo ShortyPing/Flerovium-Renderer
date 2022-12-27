@@ -12,6 +12,7 @@ import dev.steinmoetzger.raytracing.world.World;
 
 import javax.swing.*;
 import java.awt.*;
+import java.util.Random;
 
 public class Main extends JFrame {
 
@@ -24,6 +25,19 @@ public class Main extends JFrame {
         this.setVisible(true);
         this.setDefaultCloseOperation(EXIT_ON_CLOSE);
         this.world = new World();
+        this.world.addSphere(new Sphere(new Vector(1, 1, -1), 1, Color.RED));
+        this.world.createLight(1, 1, -1, 100);
+
+
+        while (this.world.getLights().get(0).getCenterVec().getY() != -6) {
+            try {
+                Thread.sleep(10);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+            this.world.getLights().get(0).getCenterVec().addY(.1f);
+            this.repaint();
+        }
 
     }
 
@@ -32,12 +46,13 @@ public class Main extends JFrame {
     public void paint(Graphics g) {
         for (int y = 0; y < 1024; y++) {
             for (int x = 0; x < 1024; x++) {
-                Vector direction = new Vector(x - 1024 / 2, 1024 / 2 - y, -1024).unitVector();
+                Vector direction = new Vector(512, 512, 1024).unitVector();
 
-                Color c = trace(new Vector(0, 1, 5), direction);
+                Color c = trace(new Vector(0, 0, 0), direction);
 
                 g.setColor(c);
                 g.fillRect(x, y, 1, 1);
+
 
             }
         }
@@ -60,8 +75,9 @@ public class Main extends JFrame {
 
         Vector p = origin.vectorAdd(direction).vectorMult(distance);
         Vector n = (p.vectorSub(world.getSpheres().get(idx).getCenterVec())).unitVector();
-        Color c = new Color(0, 0, 0);
 
+
+        Color c = world.getSpheres().get(idx).getColor();
 
         for (var light : world.getLights()) {
             Vector l = light.getCenterVec().vectorSub(p).unitVector();
@@ -72,16 +88,19 @@ public class Main extends JFrame {
                 }
             }
 
-            float diffuse = Float.max(0.f, l.vectorDotProduct(n) * 0.7f);
-            float specular = (float) (Math.pow(Math.max(0.f, l.vectorDotProduct(n)), 70.f) * 0.4f);
 
-            c = calcShader(c, light, diffuse, specular);
+            float d = light.getRange() - light.getCenterVec().vectorSub(p).len();
 
+            int d1 = (int) d;
 
-            if (!shadow) {
-                return world.getSpheres().get(idx).getColor();
+            if (!shadow || d <= 0 || d1 <= 0) {
+                return Color.BLACK;
             }
 
+
+
+
+            c = new Color(c.getRed() / d1, c.getGreen() / d1, c.getBlue() / d1);
 
 
         }
@@ -91,9 +110,10 @@ public class Main extends JFrame {
     }
 
     private Color calcShader(Color c, Sphere light, float diffuse, float specular) {
-        return new Color(c.getRed() * light.getColor().getRed() * diffuse + specular,
-                c.getGreen() * light.getColor().getGreen() * diffuse + specular,
-                c.getBlue() * light.getColor().getBlue() * diffuse + specular);
+        return new Color(((c.getRed() * light.getColor().getRed() * diffuse + specular) % 1),
+                ((c.getGreen() * light.getColor().getGreen() * diffuse + specular) % 1),
+                ((c.getBlue() * light.getColor().getBlue() * diffuse + specular) % 1)
+        );
     }
 
     public static void main(String[] args) {

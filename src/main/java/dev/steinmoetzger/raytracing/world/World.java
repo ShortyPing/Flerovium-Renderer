@@ -12,15 +12,15 @@ import java.util.ArrayList;
 public class World {
 
     private ArrayList<Sphere> spheres;
-    private ArrayList<Sphere> lights;
+    private ArrayList<Light> lights;
 
     public World() {
         this.spheres = new ArrayList<>();
-        this.lights = new ArrayList<>();
+        this.lights = new ArrayList<Light>();
     }
 
-    public void createLight(float x, float y, float z) {
-        this.lights.add(new Sphere(new Vector(x, y, z), 0, Color.WHITE));
+    public void createLight(float x, float y, float z, int range) {
+        this.lights.add(new Light(new Vector(x, y, z), 0, Color.WHITE, range));
     }
 
     public void addSphere(Sphere sphere) {
@@ -35,11 +35,11 @@ public class World {
         this.spheres = spheres;
     }
 
-    public ArrayList<Sphere> getLights() {
+    public ArrayList<Light> getLights() {
         return lights;
     }
 
-    public void setLights(ArrayList<Sphere> lights) {
+    public void setLights(ArrayList<Light> lights) {
         this.lights = lights;
     }
 }
